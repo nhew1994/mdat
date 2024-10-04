@@ -1,0 +1,125 @@
+
+# ATOM DEFINITION
+lattice fcc 4.079 orient x 1 0 0 orient y 0 1 0 orient z 0 0 1
+Lattice spacing in x,y,z = 4.079 4.079 4.079
+region box block 0 1 0 1 0 1 units lattice
+create_box 1 box
+Created orthogonal box = (0 0 0) to (4.079 4.079 4.079)
+  1 by 1 by 1 MPI processor grid
+create_atoms 1 box
+Created 4 atoms
+  using lattice units in orthogonal box = (0 0 0) to (4.079 4.079 4.079)
+  create_atoms CPU = 0.001 seconds
+replicate 1 1 1
+Replication is creating a 1x1x1 = 1 times larger system...
+  orthogonal box = (0 0 0) to (4.079 4.079 4.079)
+  1 by 1 by 1 MPI processor grid
+  4 atoms
+  replicate CPU = 0.001 seconds
+
+# DEFINE INTERATOMIC POTENTIAL
+pair_style eam/alloy
+pair_coeff * * CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy.txt ${element}
+pair_coeff * * CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy.txt Cu
+Reading eam/alloy potential file CuAgAuNiPdPtAlPbFeMoTaWMgCoTiZr_Zhou04.eam.alloy.txt with DATE: 2018-03-30
+neighbor 2.0 bin
+neigh_modify delay 10 check yes
+
+# DEFINE COMPUTES
+compute eng all pe/atom
+compute eatoms all reduce sum c_eng
+
+# MINIMIZATION
+reset_timestep 0
+fix 1 all box/relax iso 0.0 vmax 0.001
+thermo 10
+thermo_style custom step pe lx ly lz press c_eatoms
+min_style cg
+minimize 1e-25 1e-25 5000 10000
+Switching to 'neigh_modify every 1 delay 0 check yes' setting during minimization
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 9.8256185
+  ghost atom cutoff = 9.8256185
+  binsize = 4.9128093, bins = 1 1 1
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair eam/alloy, perpetual
+      attributes: half, newton on
+      pair build: half/bin/atomonly/newton
+      stencil: half/bin/3d
+      bin: standard
+WARNING: Energy due to 1 extra global DOFs will be included in minimizer energies
+ (src/min.cpp:219)
+Per MPI rank memory allocation (min/avg/max) = 4.495 | 4.495 | 4.495 Mbytes
+   Step         PotEng           Lx             Ly             Lz           Press         c_eatoms   
+         0  -12.287704      4.079          4.079          4.079         -215872.88     -12.287704    
+        10  -12.555241      4.03821        4.03821        4.03821       -209114.67     -12.555241    
+        20  -12.808032      3.99742        3.99742        3.99742       -200621.66     -12.808032    
+        30  -13.04441       3.95663        3.95663        3.95663       -190400.03     -13.04441     
+        40  -13.262892      3.91584        3.91584        3.91584       -178543.04     -13.262892    
+        50  -13.462248      3.87505        3.87505        3.87505       -165180.3      -13.462248    
+        60  -13.641452      3.83426        3.83426        3.83426       -150321.06     -13.641452    
+        70  -13.799388      3.79347        3.79347        3.79347       -133552.15     -13.799388    
+        80  -13.934185      3.75268        3.75268        3.75268       -113634        -13.934185    
+        90  -14.042264      3.71189        3.71189        3.71189       -88401.845     -14.042264    
+       100  -14.118444      3.6711         3.6711         3.6711        -56659.846     -14.118444    
+       110  -14.156729      3.63031        3.63031        3.63031       -17029.656     -14.156729    
+       120  -14.15998       3.6149601      3.6149601      3.6149601      6.5698017e-10 -14.15998     
+Loop time of 0.00378844 on 1 procs for 120 steps with 4 atoms
+
+72.8% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+Minimization stats:
+  Stopping criterion = energy tolerance
+  Energy initial, next-to-last, final = 
+     -12.2877044603691  -14.1599799288545  -14.1599799288545
+  Force two-norm initial, final = 27.432797 6.5576758e-14
+  Force max component initial, final = 27.432797 6.5572824e-14
+  Final line search alpha, max atom move = 1 6.5572824e-14
+  Iterations, force evaluations = 120 127
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.002138   | 0.002138   | 0.002138   |   0.0 | 56.43
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0.00029606 | 0.00029606 | 0.00029606 |   0.0 |  7.81
+Output  | 0.00039921 | 0.00039921 | 0.00039921 |   0.0 | 10.54
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 0.0009552  |            |       | 25.21
+
+Nlocal:              4 ave           4 max           4 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:            662 ave         662 max         662 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:            448 ave         448 max         448 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 448
+Ave neighs/atom = 112
+Neighbor list builds = 0
+Dangerous builds = 0
+
+variable natoms equal "count(all)"
+variable teng equal "c_eatoms"
+variable length equal "lx"
+variable ecoh equal "v_teng/v_natoms"
+
+print "Total energy (eV) = ${teng};"
+Total energy (eV) = -14.1599799288545;
+print "Number of atoms = ${natoms};"
+Number of atoms = 4;
+print "Lattice constant (Angstoms) = ${length};"
+Lattice constant (Angstoms) = 3.61496012307914;
+print "Cohesive energy (eV) = ${ecoh};"
+Cohesive energy (eV) = -3.53999498221363;
+
+# OUTPUT THE FINAL RELAXED STRUCTURE
+write_data relaxed_${element}.data
+write_data relaxed_Cu.data
+System init for write_data ...
+
+print "All done!"
+All done!
+Total wall time: 0:00:00
