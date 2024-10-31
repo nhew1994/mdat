@@ -42,7 +42,7 @@ thermo          100
 shell if [ -d equil_1 ]; then rm -rf equil_1; fi
 shell mkdir equil_1
 dump            1 all custom 100 equil_1/dump.equil_*.cfg id mass type x y z
-run             5000
+run             20000
 
 velocity        all scale $t
 
@@ -75,7 +75,7 @@ shell if [ -d equil_2 ]; then rm -rf equil_2; fi
 shell mkdir equil_2
 dump            2 all custom 100 equil_2/dump.equil_*.cfg id mass type x y z
 
-run             5000
+run             20000
 
 undump          2
 
@@ -110,23 +110,24 @@ thermo_modify   colname c_Thot Temp_hot colname c_Tcold Temp_cold &
 # Bin the atoms into 20 layers along the z-axis
 compute         layers all chunk/atom bin/1d z lower 0.05 units reduced
 
-# Continue here!
-# Block average - Input values every 10 steps (sum v_temp in each layer)
+# Block average - Input values every 10 steps (average v_temp in each layer)
 # In each layer, calculate the average temperature every 1000 steps, using the latest 100 samples.
 # Coord1 in profile.langevin represents the center point of the bin
-fix             test all ave/chunk 100 1 100 layers v_temp file profile.langevin_test
-fix             2 all ave/chunk 100 10 1000 layers v_temp file profile.langevin
+#fix             test all ave/chunk 10 1 10 layers v_temp file profile.langevin_test # For testing average v_temp in each layer
+fix             2 all ave/chunk 10 100 1000 layers v_temp file profile.langevin
 
 variable start_time equal time
 
-# f_hot and f_cold are the cumulative energies added/removed in the hot and cold regions, respectively.
-# 0.5 * (abs(f_hot) + abs(f_cold)) is delta Q. The factor of 0.5 is because the total heat flux is divided equally between the hot and cold regions.
+# f_hot and f_cold are the cumulative energies removed/added in the hot and cold regions, respectively.
+# 0.5 * (abs(f_hot) + abs(f_cold)) is delta Q is the average of the total out/in energy for the 2 regions.
+# A/2 since energy flux goes in 2 directions due to periodic z.
 # lz/2.0 is the distance from the middle of the hot region to the middle of the cold region.
-variable kappa equal (0.5*(abs(f_hot)+abs(f_cold))/(time-${start_time})/(lx*ly)/2.0)*(lz/2.0)/f_ave
+variable kappa equal (0.5*(abs(f_hot)+abs(f_cold))/(time-${start_time})/(lx*ly)/2.0)*(lz/2.0)/(f_ave + 1e-10) # To avoid division by zero
+fix      print_kappa all print 1000 "Timestep: ${step}, Running average thermal conductivity: $(v_kappa:%.2f)" file kappa_values.dat screen yes
 
 shell if [ -d kappa ]; then rm -rf kappa; fi
 shell mkdir kappa
 dump            3 all custom 100 kappa/dump.kappa_*.cfg id mass type x y z v_temp
 
-run             5000
-print           "Running average thermal conductivity: $(v_kappa:%.2f)"
+run             20000
+print           "Final running average thermal conductivity: $(v_kappa:%.2f)"

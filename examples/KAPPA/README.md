@@ -43,7 +43,7 @@ Here is how to extract Kappa from the log file output for each method.
 
 The NEMD methods use the formula kappa = dQ * dZ/dTemp where dQ =
 energy flux, and dTemp/dZ = temperature gradient.
-# Continue here!
+
 (1) in.langevin
 
 dQ = 8000 * 0.5*(0.890+0.883) / 100 / 18.82^2 / 2
@@ -57,7 +57,7 @@ dTemp = 0.574 from log file for average Temp difference between 2 regions
 dZ = 18.82
 
 Kappa = 3.29
-
+# Continue below!
 (2) in.heat
 
 dQ = (100*100) / 100 / 18.82^2 / 2
